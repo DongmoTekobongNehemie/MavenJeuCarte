@@ -23,12 +23,15 @@ public class LiarGamePlay implements Playable {
 
     @Override
     public void play() {
+    	
         Card currentCard = new Card(null, null);
         List<Card> cardsPlayed = new ArrayList<>();
 
         Configurer configurer = new LiarGameConfigurer();
 
         List<Card> cards = new ArrayList<>();
+        
+     
 
         configurer.createCards(cards);
         configurer.mixCards(cards);
@@ -48,12 +51,16 @@ public class LiarGamePlay implements Playable {
             log.log(Level.FINE, "Tour {0}", i);
 
             for (Player joueur : players) {
-
-                playOneCard(joueur, cardsPlayed, currentCard);
-
+            	
                 Pattern pattern = Pattern.values()[rand.nextInt(Pattern.values().length)];
 
-                contradict(joueur, players, currentCard, pattern, cardsPlayed);
+
+                playOneCard(joueur, cardsPlayed, currentCard,  pattern);
+                
+               Pattern currentPattern = pattern;
+
+
+                contradict(joueur, players, currentCard, currentPattern, cardsPlayed);
 
                 if (joueur.getHand().isEmpty()) {
                     log.log(INFO, "Le gagnant est {0} au tour {1}!", new Object[]{joueur.getName(), i});
@@ -67,12 +74,12 @@ public class LiarGamePlay implements Playable {
     }
 
     @Override
-    public void playOneCard(Player joueur, List<Card> cardsPlayed, Card currentCard) {
+    public void playOneCard(Player joueur, List<Card> cardsPlayed, Card currentCard, Pattern avis) {
         int randomNumber = rand.nextInt(joueur.getHand().size());
 
         Pattern[] values = Pattern.values();
         int index = rand.nextInt(values.length);
-        Pattern avis = values[index];
+        avis = values[index];
 
         cardsPlayed.add(joueur.getHand().get(randomNumber));
         currentCard.setPattern(joueur.getHand().get(randomNumber).getPattern());
@@ -92,6 +99,7 @@ public class LiarGamePlay implements Playable {
         }
     }
 
+    
     public void contradict(Player player, List<Player> players, Card currentCard, Pattern pattern,
                            List<Card> cardsPlayed) {
         // Créer une liste de joueurs excluant le joueur actuel
@@ -109,12 +117,13 @@ public class LiarGamePlay implements Playable {
 
         if (currentCard.getPattern().equals(pattern)) {
             listeAutresJoueurs.get(randomNumber).getHand().addAll(cardsPlayed);
+            cardsPlayed.clear();
         } else {
-            player.getHand().addAll(cardsPlayed);
+            player.getHand().addAll(cardsPlayed); 
+            cardsPlayed.clear();
+
         }
 
-        // Vider la liste des cartes jouées
-        cardsPlayed.clear();
     }
 
 }
